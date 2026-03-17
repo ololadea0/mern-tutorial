@@ -5,16 +5,18 @@
   "main": "index.js",
   "scripts": {
     "start": "node backend/server.js",
-    "dev": "nodemon backend/server.js"
+    "dev": "nodemon --cwd backend server.js"
   },
   "keywords": [],
   "author": "Ololade",
   "license": "ISC",
-  "type": "commonjs",
+  "type": "module",
   "dependencies": {
     "colors": "^1.4.0",
+    "cross-env": "^10.1.0",
     "dotenv": "^17.3.1",
     "express": "^5.2.1",
+    "express-async-handler": "^1.2.0",
     "mongoose": "^9.3.0"
   },
   "devDependencies": {
