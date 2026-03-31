@@ -60,11 +60,16 @@ export const getGoals = createAsyncThunk(
   "goals/getAll",
   async (_, thunkAPI) => {
     try {
+      // Get current user from auth state
       const user = thunkAPI.getState().auth.user;
       if (!user) {
         return thunkAPI.rejectWithValue("User not authenticated");
       }
+
+      // Get the security token
       const token = user.token;
+
+      // Call backend with token
       return await goalService.getGoals(token);
     } catch (error) {
       const message =

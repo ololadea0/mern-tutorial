@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { FaSignInAlt } from "react-icons/fa";
+import { FaSignInAlt, FaEye, FaEyeSlash } from "react-icons/fa";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -12,6 +12,8 @@ function Login() {
     password: "",
   });
 
+  const [showPassword, setShowPassword] = useState(false);
+
   const { email, password } = formData;
 
   const navigate = useNavigate();
@@ -19,18 +21,36 @@ function Login() {
   const { user, isLoading, isError, isSuccess, message } = useSelector(
     (state) => state.auth,
   );
+  // Handle errors - show toast
   useEffect(() => {
-    if (isError) {
+    if (isError && message) {
       toast.error(message);
     }
+  }, [isError, message]);
 
+  // Handle user already logged in - navigate
+  useEffect(() => {
+    if (user) {
+      navigate("/");
+    }
+  }, [user, navigate]);
+
+  // Handle success - navigate and clean up
+  useEffect(() => {
     if (isSuccess) {
       navigate("/");
-      dispatch(reset());
     }
+  }, [isSuccess, navigate]);
 
-    dispatch(reset());
-  }, [user, isError, isSuccess, message, navigate, dispatch]);
+  // Clean up states after they're used
+  useEffect(() => {
+    if (isError || isSuccess) {
+      const timer = setTimeout(() => {
+        dispatch(reset());
+      }, 2000); // Clear after 2 seconds
+      return () => clearTimeout(timer);
+    }
+  }, [isError, isSuccess, dispatch]);
 
   const onChange = (e) => {
     setFormData((prevState) => ({
@@ -71,18 +91,40 @@ function Login() {
               placeholder="Enter email"
               value={email}
               onChange={onChange}
+              autoComplete="email"
             />
           </div>
           <div className="form-group">
-            <input
-              type="password"
-              className="form-control"
-              id="password"
-              name="password"
-              placeholder="Enter password"
-              value={password}
-              onChange={onChange}
-            />
+            <div style={{ position: "relative" }}>
+              <input
+                type={showPassword ? "text" : "password"}
+                className="form-control"
+                id="password"
+                name="password"
+                placeholder="Enter password"
+                value={password}
+                onChange={onChange}
+                autoComplete="current-password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                style={{
+                  position: "absolute",
+                  right: "10px",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  fontSize: "18px",
+                  color: "#666",
+                  padding: "5px",
+                }}
+              >
+                {showPassword ? <FaEyeSlash /> : <FaEye />}
+              </button>
+            </div>
           </div>
 
           <div className="form-group">

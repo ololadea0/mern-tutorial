@@ -16,6 +16,15 @@ const registerUser = asyncHandler(async (req, res) => {
     }
     const { name, email, password } = req.body;
 
+    // Validate password strength BEFORE hashing
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/;
+    if (!passwordRegex.test(password))
+    {
+        res.status(400);
+        throw new Error('Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character');
+    }
+
+
     // Check if user exists
     const userExists = await User.findOne({ email });
     if (userExists)
@@ -24,31 +33,42 @@ const registerUser = asyncHandler(async (req, res) => {
         throw new Error('User already exists');
     }
 
-    // Hash password
+    // Hash password AFTER validation
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
     // Create user
-    const user = await User.create({
-        name,
-        email,
-        password: hashedPassword,
-
-    });
-
-    if (user)
+    try
     {
-        res.status(201).json({
-            _id: user._id,
-            name: user.name,
-            email: user.email,
-            token: generateToken(user._id)
-
+        const user = await User.create({
+            name,
+            email,
+            password: hashedPassword,
         });
-    } else
+
+        if (user)
+        {
+            res.status(201).json({
+                _id: user._id,
+                name: user.name,
+                email: user.email,
+                token: generateToken(user._id)
+            });
+        } else
+        {
+            res.status(400);
+            throw new Error('Invalid user data');
+        }
+    } catch (error)
     {
         res.status(400);
-        throw new Error('Invalid user data');
+        // Handle Mongoose validation errors
+        if (error.errors)
+        {
+            const messages = Object.values(error.errors).map(err => err.message);
+            throw new Error(messages[0]);
+        }
+        throw error;
     }
 
 

@@ -8,8 +8,9 @@ import GoalItem from "../components/GoalItem";
 
 function Dashboard() {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
+  const dispatch = useDispatch(); // ← For SENDING actions
 
+  // Get data FROM Redux store
   const { user } = useSelector((state) => state.auth);
   const { goals, isLoading, isError, message } = useSelector(
     (state) => state.goals,
@@ -22,14 +23,14 @@ function Dashboard() {
     }
 
     if (!user) {
-      navigate("/login");
+      navigate("/login"); // Redirect if not logged in
       return;
     }
 
-    dispatch(getGoals());
+    dispatch(getGoals()); // ← DISPATCH action to fetch goals
 
     return () => {
-      dispatch(reset());
+      dispatch(reset()); // Clean up
     };
   }, [user, navigate, isError, message, dispatch]);
 
@@ -48,6 +49,7 @@ function Dashboard() {
       <section className="content">
         {goals.length > 0 ? (
           <div className="goals">
+            {/* Loop through goals from Redux store */}
             {goals.map((goal) => (
               <GoalItem key={goal._id} goal={goal} />
             ))}

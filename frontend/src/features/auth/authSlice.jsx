@@ -16,8 +16,9 @@ const initialState = {
 export const register = createAsyncThunk(
   "auth/register",
   async (user, thunkAPI) => {
+    // user = {name, email, password}
     try {
-      return await authService.register(user);
+      return await authService.register(user); // Call backend
     } catch (error) {
       const message =
         (error.response &&
@@ -64,9 +65,9 @@ export const authSlice = createSlice({
         state.isLoading = true;
       })
       .addCase(register.fulfilled, (state, action) => {
-        state.isLoading = false;
-        state.isSuccess = true;
-        state.user = action.payload;
+        state.isLoading = false; // Stop Spinner
+        state.isSuccess = true; // Success flag
+        state.user = action.payload; //Save new user
         if (action.payload) {
           localStorage.setItem("user", JSON.stringify(action.payload));
         }
